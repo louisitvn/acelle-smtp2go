@@ -1,0 +1,27 @@
+{
+    "name": "acelle/smtp2go",
+    "title": "SMTP2GO",
+    "version": "1.0.0",
+    "app_version": "4.2.0",
+    "description": "SMTP2GO (smtp2go.com) integration plugin for Acelle",
+    "authors": [
+        {
+            "name": "Mailixa",
+            "email": "louisitvn@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Acelle\\Plugin\\Smtp2go\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Acelle\\Plugin\\Smtp2go\\ServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

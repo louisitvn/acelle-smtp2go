@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SMTP2GO for Acelle Mail — User Guide</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root {
+    --fg: #1f2933;
+    --fg-soft: #52606d;
+    --muted: #7b8794;
+    --line: #e4e7eb;
+    --line-soft: #f1f4f7;
+    --bg: #ffffff;
+    --bg-soft: #f8fafc;
+    --accent: #3b82f6;
+    --accent-soft: #eff6ff;
+    --code-bg: #f6f8fa;
+    --code-fg: #24292f;
+    --note-bg: #fffbeb;
+    --note-border: #fbbf24;
+    --table-stripe: #fafbfc;
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+    margin: 0;
+    color: var(--fg);
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+.container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 32px 96px;
+}
+h1, h2, h3, h4 {
+    color: var(--fg);
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 2.2em 0 0.6em;
+    scroll-margin-top: 24px;
+}
+h1 {
+    font-size: 2.2em;
+    margin-top: 0;
+    margin-bottom: 0.4em;
+    letter-spacing: -0.01em;
+}
+h2 {
+    font-size: 1.5em;
+    padding-bottom: 0.35em;
+    border-bottom: 1px solid var(--line);
+}
+h3 { font-size: 1.18em; }
+h4 { font-size: 1.02em; color: var(--fg-soft); }
+p { margin: 0.8em 0; }
+a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .12s;
+}
+a:hover { border-bottom-color: var(--accent); }
+hr {
+    height: 1px;
+    border: 0;
+    background: var(--line);
+    margin: 3em 0;
+}
+ul, ol { padding-left: 1.6em; margin: 0.8em 0; }
+li { margin: 0.25em 0; }
+li > p { margin: 0.3em 0; }
+strong { color: var(--fg); font-weight: 600; }
+em { color: var(--fg-soft); }
+code {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+}
+pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 16px 18px;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    line-height: 1.55;
+    margin: 1em 0;
+}
+pre code {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font-size: 0.92em;
+}
+blockquote {
+    margin: 1.2em 0;
+    padding: 14px 18px 14px 18px;
+    background: var(--note-bg);
+    border-left: 4px solid var(--note-border);
+    border-radius: 0 6px 6px 0;
+    color: var(--fg-soft);
+}
+blockquote p:first-child { margin-top: 0; }
+blockquote p:last-child { margin-bottom: 0; }
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.2em 0;
+    font-size: 0.96em;
+    box-shadow: var(--shadow);
+    border-radius: 6px;
+    overflow: hidden;
+}
+thead { background: var(--bg-soft); }
+th, td {
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+}
+th {
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--bg-soft);
+}
+tbody tr:nth-child(even) { background: var(--table-stripe); }
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.4em auto;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 16px rgba(15,23,42,.06);
+}
+/* Table of Contents — the first ordered list right after H1 */
+.container > ol:first-of-type {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 24px 18px 44px;
+    counter-reset: toc;
+    list-style: none;
+}
+.container > ol:first-of-type > li {
+    counter-increment: toc;
+    position: relative;
+    padding-left: 1.4em;
+    margin: 0.32em 0;
+}
+.container > ol:first-of-type > li::before {
+    content: counter(toc) ".";
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+    .container { padding: 32px 18px 64px; }
+    h1 { font-size: 1.7em; }
+    h2 { font-size: 1.3em; }
+    table { font-size: 0.9em; }
+    th, td { padding: 8px 10px; }
+}
+@media print {
+    .container { max-width: none; padding: 0; }
+    img { box-shadow: none; }
+    a { color: var(--fg); border-bottom: 0; }
+    h1, h2 { break-after: avoid; }
+    img, table, pre, blockquote { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<main class="container">
+<h1 id="smtp2go-for-acelle-mail-user-guide">SMTP2GO for Acelle Mail — User Guide</h1>
+<p>A drop-in plugin that adds <strong>SMTP2GO</strong> (<code>smtp2go.com</code>) as a sending-server type in Acelle. SMTP2GO is a global SMTP relay + REST API specialising in deliverability — they handle DKIM signing, IP warmup, and the boring deliverability infrastructure on every email. This plugin sends via SMTP2GO&#39;s REST API and <strong>auto-registers the bounce / spam webhook on first send</strong> so you never have to copy-paste a webhook URL between two dashboards.</p>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-requirements">Requirements</a></li>
+<li><a href="#2-install-the-plugin">Install the plugin</a></li>
+<li><a href="#3-enable-the-plugin">Enable the plugin</a></li>
+<li><a href="#4-add-smtp2go-as-a-sending-server">Add SMTP2GO as a sending server</a></li>
+<li><a href="#5-configure-the-api-key">Configure the API key</a></li>
+<li><a href="#6-auto-registered-webhook-how-it-works">Auto-registered webhook — how it works</a></li>
+<li><a href="#7-sending-identities-verified-domains">Sending identities (verified domains)</a></li>
+<li><a href="#8-test-the-connection">Test the connection</a></li>
+<li><a href="#9-assign-the-server-to-a-plan-or-customer">Assign the server to a plan or customer</a></li>
+<li><a href="#10-troubleshooting">Troubleshooting</a></li>
+<li><a href="#11-uninstall">Uninstall</a></li>
+</ol>
+<hr>
+<h2 id="1-requirements">1. Requirements</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Minimum</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Acelle Mail</strong></td>
+<td>4.2.0 or newer</td>
+</tr>
+<tr>
+<td><strong>PHP</strong></td>
+<td>8.1+</td>
+</tr>
+<tr>
+<td><strong>SMTP2GO account</strong></td>
+<td>Free signup at <a href="https://smtp2go.com">smtp2go.com</a>. Free plan: 1000 emails/month forever, no card required.</td>
+</tr>
+<tr>
+<td><strong>API key</strong></td>
+<td>Generated at app.smtp2go.com → Settings → API Keys (<code>api-...</code> prefix). Scope = <strong>full</strong>.</td>
+</tr>
+<tr>
+<td><strong>Outbound HTTPS</strong></td>
+<td>Server must reach <code>api.smtp2go.com</code> on port 443</td>
+</tr>
+<tr>
+<td><strong>Inbound HTTPS</strong></td>
+<td>Your Acelle install must be reachable so SMTP2GO can POST bounce / spam webhooks to <code>https://your-acelle-domain/webhook/acelle-smtp2go/{server_uid}</code> (URL is auto-registered)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="2-install-the-plugin">2. Install the plugin</h2>
+<ol>
+<li>Download <code>acelle-smtp2go-v1.0.x.zip</code> from CodeCanyon.</li>
+<li><strong>System → Plugins</strong> → <strong>Install plugin</strong> → drop ZIP → <strong>Upload &amp; install</strong>.</li>
+</ol>
+<p><img src="images/smtp2go-plugin-01-install-upload-page.png" alt="Install plugin upload dialog"></p>
+<p>After install, <strong>SMTP2GO</strong> appears as <strong>Inactive</strong>:</p>
+<p><img src="images/smtp2go-plugin-02-plugins-list-smtp2go-inactive.png" alt="Plugins list with SMTP2GO inactive"></p>
+<hr>
+<h2 id="3-enable-the-plugin">3. Enable the plugin</h2>
+<p>Find the <strong>SMTP2GO</strong> card → ⋮ → <strong>Enable</strong>.</p>
+<p>Card flips to <strong>Active</strong>:</p>
+<p><img src="images/smtp2go-plugin-04-plugins-list-smtp2go-active.png" alt="Plugins list with SMTP2GO active"></p>
+<hr>
+<h2 id="4-add-smtp2go-as-a-sending-server">4. Add SMTP2GO as a sending server</h2>
+<ol>
+<li><strong>Sending → Sending Servers</strong> → <strong>+ Add Server</strong>.</li>
+</ol>
+<p><img src="images/smtp2go-plugin-05-sending-servers-list.png" alt="Sending servers list"></p>
+<ol start="2">
+<li>Picker opens. Pick <strong>SMTP2GO</strong> from the <strong>Plugin Servers</strong> group:</li>
+</ol>
+<p><img src="images/smtp2go-plugin-06-select-driver-type.png" alt="Choose Server Type — SMTP2GO under Plugin Servers"></p>
+<hr>
+<h2 id="5-configure-the-api-key">5. Configure the API key</h2>
+<p>Only one field to fill: the API key.</p>
+<p><img src="images/smtp2go-plugin-07-smtp2go-config-empty.png" alt="Empty SMTP2GO configuration form"></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Name</strong></td>
+<td>Label for your sending-server list (e.g. <code>SMTP2GO (production)</code>)</td>
+</tr>
+<tr>
+<td><strong>API Key</strong></td>
+<td>From app.smtp2go.com → Settings → API Keys. Begins with <code>api-</code>. Must have <strong>full scope</strong> so the plugin can send emails AND auto-register the webhook.</td>
+</tr>
+<tr>
+<td><strong>Webhook URL</strong></td>
+<td><em>Read-only.</em> Populated after the row is saved + first send.</td>
+</tr>
+</tbody></table>
+<p><img src="images/smtp2go-plugin-08-smtp2go-config-filled.png" alt="Filled SMTP2GO configuration form"></p>
+<p>Click <strong>Save</strong>. The plugin verifies the API key with a live probe — wrong key, inline 401 error, row not saved.</p>
+<hr>
+<h2 id="6-auto-registered-webhook-how-it-works">6. Auto-registered webhook — how it works</h2>
+<p>The first time a campaign / automation / transactional email is sent through this SMTP2GO server, the plugin&#39;s <code>setupBeforeSend</code> hook fires and calls SMTP2GO&#39;s <code>POST /webhook/add</code> endpoint:</p>
+<ol>
+<li>Plugin generates a random <strong>webhook user + password</strong> (basic-auth pair).</li>
+<li>Plugin calls <code>POST /webhook/add</code> with:<ul>
+<li><code>url</code>: <code>https://your-acelle-domain/webhook/acelle-smtp2go/{server_uid}</code></li>
+<li><code>events</code>: <code>bounce</code>, <code>spam</code>, <code>unsubscribe</code> (configurable).</li>
+<li><code>username</code> + <code>password</code> (the basic-auth pair).</li>
+</ul>
+</li>
+<li>SMTP2GO returns a webhook id. Plugin stores <code>smtp2go_webhook_id</code>, <code>smtp2go_webhook_user</code>, <code>smtp2go_webhook_pass</code> in the server config.</li>
+<li>From then on, every status event SMTP2GO emits is POSTed to your Acelle URL with <strong>HTTP Basic Auth</strong>. The plugin verifies the user / pass on every callback. Spoofed POSTs are rejected at the edge.</li>
+</ol>
+<p>You never paste anything into SMTP2GO&#39;s dashboard — the registration is fully automatic.</p>
+<blockquote>
+<p><strong>Force the webhook to register before first real send.</strong> Use <strong>⋮ → Test send</strong> on the Sending Servers list. The single test email triggers <code>setupBeforeSend</code> exactly like a real send would.</p>
+</blockquote>
+<hr>
+<h2 id="7-sending-identities-verified-domains">7. Sending identities (verified domains)</h2>
+<p>SMTP2GO uses domain-level sender verification — you verify your sending domain at app.smtp2go.com → <strong>Sender Domains</strong>. Once verified, you can send from any address on that domain.</p>
+<p>The plugin syncs SMTP2GO domains into Acelle&#39;s <code>sending_identities</code> table:</p>
+<ul>
+<li><strong>Sync from SMTP2GO</strong> — <code>GET /domain/show</code> reconciles your SMTP2GO domain list into Acelle.</li>
+<li><strong>DKIM + DMARC records</strong> for each domain are surfaced inside Acelle&#39;s identity detail page (copy-paste DNS lines).</li>
+</ul>
+<blockquote>
+<p><strong>Without a verified sending domain</strong>, SMTP2GO silently drops sends from unverified addresses. <strong>Verify your domain BEFORE flipping production traffic to SMTP2GO.</strong></p>
+</blockquote>
+<hr>
+<h2 id="8-test-the-connection">8. Test the connection</h2>
+<p>Two ways to verify before wiring the server into a real plan:</p>
+<p><strong>(a) Connection test</strong> — built into the new-server form. The Save handler runs a live <code>/account</code> probe against the API key.</p>
+<p><strong>(b) Test send</strong> — from the Sending Servers list, ⋮ → <strong>Test send</strong>. Acelle delivers a single test email through the driver and reports the vendor <code>message_id</code>. <strong>The first test send also triggers webhook auto-registration</strong> — see <a href="#6-auto-registered-webhook-how-it-works">§6</a>.</p>
+<hr>
+<h2 id="9-assign-the-server-to-a-plan-or-customer">9. Assign the server to a plan or customer</h2>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>System server, plan-attached</strong></td>
+<td>Your Acelle SaaS sends on behalf of customers. Assign SMTP2GO at <strong>Admin → Plans → [plan] → Sending Servers</strong>.</td>
+</tr>
+<tr>
+<td><strong>Per-customer</strong></td>
+<td>A specific customer brings their own SMTP2GO account. They add the server from their own customer-side <strong>Sending Servers</strong> page.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="10-troubleshooting">10. Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&quot;401 Unauthorized&quot; on save</td>
+<td>API key wrong, scope not &quot;full&quot;</td>
+<td>Re-generate at app.smtp2go.com → Settings → API Keys with scope=full</td>
+</tr>
+<tr>
+<td>Sends succeed, no bounces appear</td>
+<td>Webhook not yet auto-registered (no real send through this server yet)</td>
+<td>Use ⋮ → Test send to force webhook auto-registration</td>
+</tr>
+<tr>
+<td>Webhooks land but rejected as unauthorized</td>
+<td>Basic-auth user/pass in <code>sending_servers.config</code> doesn&#39;t match what SMTP2GO has on file</td>
+<td>Edit the server, blank the API key field and re-paste; this triggers fresh webhook registration</td>
+</tr>
+<tr>
+<td>Email accepted by API but never delivered</td>
+<td>Sending domain not verified at SMTP2GO</td>
+<td>Verify domain at app.smtp2go.com → Sender Domains</td>
+</tr>
+<tr>
+<td>Plugin Active but SMTP2GO missing from picker</td>
+<td>Stale opcache / view cache</td>
+<td><code>php artisan optimize:clear</code> and reload</td>
+</tr>
+</tbody></table>
+<p>Plugin HTTP calls log to <code>storage/logs/laravel.log</code>.</p>
+<hr>
+<h2 id="11-uninstall">11. Uninstall</h2>
+<ol>
+<li><strong>System → Plugins</strong> → find <strong>SMTP2GO</strong> → ⋮ → <strong>Disable</strong>. New sending servers can no longer be created with this driver; existing rows still work.</li>
+<li>To remove files: ⋮ → <strong>Delete</strong>. <strong>Drops every <code>sending_servers</code> row of type <code>acelle-smtp2go</code></strong> (handled by the plugin&#39;s lifecycle hook).</li>
+</ol>
+<p>You may also want to disable the webhook in SMTP2GO&#39;s dashboard manually; otherwise it&#39;ll keep POSTing to a now-404 URL until SMTP2GO&#39;s retry policy gives up.</p>
+<hr>
+<h2 id="support">Support</h2>
+<ul>
+<li>Documentation: this guide + plugin source code comments</li>
+<li>Issue tracker / questions: CodeCanyon item comments page</li>
+<li>Direct contact: see the <strong>Author</strong> column on the CodeCanyon item page</li>
+</ul>
+<p>SMTP2GO account / billing / domain-verification issues go to SMTP2GO support directly.</p>
+
+</main>
+</body>
+</html>
