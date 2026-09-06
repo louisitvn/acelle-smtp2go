@@ -36,6 +36,9 @@ class ServiceProvider extends Base
             'type'         => Smtp2goDriver::TYPE,
             'driver'       => Smtp2goDriver::class,
             'config_keys'  => ['smtp2go_api_key', 'smtp2go_webhook_id', 'smtp2go_webhook_user', 'smtp2go_webhook_pass'],
+            // Credentials — encrypted at rest by SendingServer::setConfig().
+            // The webhook id and basic-auth USER are identifiers, not secrets.
+            'secret_config_keys' => ['smtp2go_api_key', 'smtp2go_webhook_pass'],
             'name'         => 'SMTP2GO',
             'description'  => 'Send via SMTP2GO (smtp2go.com) — REST API with auto-registered webhook',
             'icon_url'     => route('plugin.acelle.smtp2go.icon'),
