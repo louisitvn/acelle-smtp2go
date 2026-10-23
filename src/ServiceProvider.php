@@ -3,6 +3,7 @@
 namespace Acelle\Plugin\Smtp2go;
 
 use App\Library\Facades\Hook;
+use App\SendingServers\DomainVerification\RecordPurpose;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider as Base;
 
@@ -29,6 +30,15 @@ class ServiceProvider extends Base
 
     public function boot(): void
     {
+        // SMTP2GO's tracking CNAME is a RecordPurpose::TRACKING record, which the platform
+        // added on 2026-10-23. On an older platform the plugin would install, then
+        // fail at its first domain sync — and the server edit page disables a
+        // server whose sync throws. Refuse to load instead: the platform reports a
+        // plugin that fails to boot to its admins.
+        if (!defined(RecordPurpose::class . '::TRACKING')) {
+            throw new \RuntimeException('The SMTP2GO plugin needs a newer version of the platform: its sending domains have no tracking-record type (RecordPurpose::TRACKING). Upgrade the platform, then activate the plugin again.');
+        }
+
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'smtp2go');
         $this->loadRoutesFrom(__DIR__ . '/../routes.php');
 

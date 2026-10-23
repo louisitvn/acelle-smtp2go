@@ -556,7 +556,7 @@ class Smtp2goDriver extends AbstractDriver implements
             'spf'            => RecordPurpose::SPF,
             'dkim'           => RecordPurpose::DKIM,
             'returnpath'     => RecordPurpose::OWNERSHIP,
-            'tracking'       => RecordPurpose::OWNERSHIP,
+            'tracking'       => RecordPurpose::TRACKING,
             'dmarc'          => RecordPurpose::DMARC,
         ];
         foreach ($keys as $key => $purpose) {
@@ -595,6 +595,7 @@ class Smtp2goDriver extends AbstractDriver implements
         if ($h === 'dkim') return RecordPurpose::DKIM;
         if ($h === 'spf')  return RecordPurpose::SPF;
         if ($h === 'dmarc') return RecordPurpose::DMARC;
+        if ($h === 'tracking') return RecordPurpose::TRACKING;
 
         $nLow = strtolower($name);
         $vLow = strtolower($value);
