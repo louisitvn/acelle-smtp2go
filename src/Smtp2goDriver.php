@@ -384,17 +384,15 @@ class Smtp2goDriver extends AbstractDriver implements
 
     // ─── SupportsIdentitySync ──────────────────────────────────────────────
 
+    /**
+     * A list that cannot be read makes the whole sync fail: nothing is
+     * archived, and the admin sees SMTP2GO's answer (it used to read as "no
+     * domains"). Whether domain/view is ever paged is unknown — this driver
+     * has not been run against an account yet.
+     */
     public function fetchIdentities(): array
     {
-        try {
-            $resp = $this->client()->post('domain/view', []);
-        } catch (Error $e) {
-            Log::warning('SMTP2GO fetchIdentities: list failed', [
-                'server_id' => $this->server->id,
-                'error'     => $e->getMessage(),
-            ]);
-            return [];
-        }
+        $resp = $this->client()->post('domain/view', []);
 
         $identities = [];
         foreach (($resp['data']['domains'] ?? $resp['data'] ?? []) as $d) {
@@ -414,11 +412,8 @@ class Smtp2goDriver extends AbstractDriver implements
             return null;
         }
 
-        try {
-            $resp = $this->client()->post('domain/view', ['domain' => $value]);
-        } catch (Error $e) {
-            return null;
-        }
+        // A failed call propagates: read as "not found" it would archive the domain.
+        $resp = $this->client()->post('domain/view', ['domain' => $value]);
 
         $d = $this->domainFromView($resp, $value);
         return $d === null ? null : $this->mapDomainToIdentity($d);
