@@ -4,6 +4,7 @@ namespace Acelle\Plugin\Smtp2go;
 
 use App\Library\Facades\Hook;
 use App\SendingServers\DomainVerification\RecordPurpose;
+use App\SendingServers\DomainVerification\VerificationResult;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider as Base;
 
@@ -37,6 +38,11 @@ class ServiceProvider extends Base
         // plugin that fails to boot to its admins.
         if (!defined(RecordPurpose::class . '::TRACKING')) {
             throw new \RuntimeException('The SMTP2GO plugin needs a newer version of the platform: its sending domains have no tracking-record type (RecordPurpose::TRACKING). Upgrade the platform, then activate the plugin again.');
+        }
+        // Same for the domain-verification result's full status (also 2026-10-23;
+        // it was a yes/no): without it the first registration or Verify fails.
+        if (!property_exists(VerificationResult::class, 'status')) {
+            throw new \RuntimeException('The SMTP2GO plugin needs a newer version of the platform: its domain-verification result has no status (VerificationResult::$status). Upgrade the platform, then activate the plugin again.');
         }
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'smtp2go');

@@ -420,18 +420,8 @@ class Smtp2goDriver extends AbstractDriver implements
             return null;
         }
 
-        $d = $resp['data']['domain'] ?? null;
-        if (!is_array($d)) {
-            // Fallback: domain/view sometimes returns list when single
-            // lookup fails — scan for match.
-            foreach (($resp['data']['domains'] ?? []) as $candidate) {
-                if (is_array($candidate) && strtolower((string) ($candidate['domain'] ?? '')) === strtolower($value)) {
-                    return $this->mapDomainToIdentity($candidate);
-                }
-            }
-            return null;
-        }
-        return $this->mapDomainToIdentity($d);
+        $d = $this->domainFromView($resp, $value);
+        return $d === null ? null : $this->mapDomainToIdentity($d);
     }
 
     // ─── SupportsRemoteDomainVerify ────────────────────────────────────────
@@ -466,18 +456,38 @@ class Smtp2goDriver extends AbstractDriver implements
             ]);
         }
 
-        try {
-            $resp = $this->client()->post('domain/view', ['domain' => $domain]);
-        } catch (Error $e) {
-            return new VerificationResult(
-                domain: $domain,
-                records: [],
-                verified: false,
-                polledAt: new DateTimeImmutable(),
-            );
+        // An error propagates: it says nothing about the domain.
+        $resp = $this->client()->post('domain/view', ['domain' => $domain]);
+        $d = $this->domainFromView($resp, $domain);
+        if ($d === null) {
+            // Not DomainNotAtVendor: this driver has never seen SMTP2GO's answer
+            // for a domain it lacks, so it cannot tell "deleted there" from an
+            // answer it does not read — and DomainNotAtVendor archives the domain.
+            throw new \UnexpectedValueException("SMTP2GO's domain/view answer holds no domain {$domain}: " . json_encode($resp));
         }
-        $d = $resp['data']['domain'] ?? ($resp['data'] ?? []);
-        return $this->mapDomainToVerificationResult(is_array($d) ? $d : []);
+        return $this->mapDomainToVerificationResult($d);
+    }
+
+    /**
+     * The domain's blob in a domain/view answer: `data.domain` for a single
+     * lookup, or its entry in the `data.domains` list SMTP2GO sometimes
+     * answers with instead. Null when neither holds it.
+     *
+     * @param  array<string, mixed>  $resp
+     * @return array<string, mixed>|null
+     */
+    private function domainFromView(array $resp, string $domain): ?array
+    {
+        $single = $resp['data']['domain'] ?? null;
+        if (is_array($single)) {
+            return $single;
+        }
+        foreach (($resp['data']['domains'] ?? []) as $candidate) {
+            if (is_array($candidate) && strtolower((string) ($candidate['domain'] ?? '')) === strtolower($domain)) {
+                return $candidate;
+            }
+        }
+        return null;
     }
 
     // ─── Helpers ───────────────────────────────────────────────────────────
@@ -500,17 +510,31 @@ class Smtp2goDriver extends AbstractDriver implements
      */
     private function mapDomainToIdentity(array $domain): Identity
     {
-        $name     = (string) ($domain['domain'] ?? '');
-        $verified = !empty($domain['verified']) || ($domain['status'] ?? null) === 'verified';
+        $name   = (string) ($domain['domain'] ?? '');
+        $status = $this->domainStatusOf($domain);
         return Identity::domain(
             name: $name,
-            status: $verified ? IdentityStatus::VERIFIED : IdentityStatus::PENDING,
+            status: $status,
             vendorMeta: [
-                'verified'           => $verified,
+                'verified'           => $status === IdentityStatus::VERIFIED,
                 'tracking_subdomain' => $domain['tracking_subdomain'] ?? null,
                 'returnpath_subdomain' => $domain['returnpath_subdomain'] ?? null,
             ],
         );
+    }
+
+    /**
+     * A domain's status, the same for identity sync and Verify. SMTP2GO reports
+     * verified or not — no rejected or switched-off domain state — so "not
+     * verified" is PENDING: the DNS is not right yet.
+     *
+     * @param  array<string, mixed>  $domain
+     */
+    private function domainStatusOf(array $domain): IdentityStatus
+    {
+        return !empty($domain['verified']) || ($domain['status'] ?? null) === 'verified'
+            ? IdentityStatus::VERIFIED
+            : IdentityStatus::PENDING;
     }
 
     /**
@@ -521,7 +545,7 @@ class Smtp2goDriver extends AbstractDriver implements
         return new VerificationResult(
             domain:   (string) ($domain['domain'] ?? ''),
             records:  $this->extractDnsRecords($domain),
-            verified: !empty($domain['verified']) || ($domain['status'] ?? null) === 'verified',
+            status:   $this->domainStatusOf($domain),
             polledAt: new DateTimeImmutable(),
             vendorMeta: ['verified' => $domain['verified'] ?? null],
         );
